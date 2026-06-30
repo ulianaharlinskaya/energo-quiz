@@ -1,0 +1,564 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // Настраиваем фирменные цвета, градиент и шрифт
+  tailwind.config = {
+    corePlugins: { preflight: false },
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Manrope', 'sans-serif'],
+        },
+        colors: {
+          brand: {
+            accent1: '#1E2F5E',   // Акцентный синий
+            accent2: '#005754',   // Акцентный зеленый
+            secondary: '#EBF5F9', // Второстепенный светло-голубой
+            text: '#1C1E1D',      // Основной текст
+            muted: '#68706D',     // Второстепенный текст
+            border: '#E1E4E2',    // Цвет рамок (нейтральный)
+            cardtext: '#627A84',  // Цвет текста для спец-карточки
+            focus: '#BCE8EA',     // Цвет обводки инпутов
+            checkbox_bg: '#E5EEF1' // Фон чекбокса
+          }
+        },
+        backgroundImage: {
+          'brand-grad': 'linear-gradient(90deg, #40CEC7 0%, #0071BA 50%, #1E315E 100%)',
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  #medscan-quiz-wrapper {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  #medscan-quiz-wrapper * {
+    box-sizing: border-box;
+  }
+  #medscan-quiz-wrapper button, 
+  #medscan-quiz-wrapper input {
+    font-family: inherit;
+    outline: none;
+    box-shadow: none;
+  }
+  #medscan-quiz-wrapper input[type="text"],
+  #medscan-quiz-wrapper input[type="tel"],
+  #medscan-quiz-wrapper input[type="email"] {
+    background-color: #FAFAFA;
+    border: 1px solid #E1E4E2;
+    color: #1C1E1D;
+    transition: border-color 0.2s ease;
+  }
+  /* Обводка инпута при фокусе */
+  #medscan-quiz-wrapper input:focus {
+    border-color: #BCE8EA !important;
+    box-shadow: 0 0 0 1px #BCE8EA;
+  }
+  #medscan-quiz-wrapper input::placeholder {
+    color: #A0A5A3;
+  }
+  /* Плавные анимации появления */
+  @keyframes mzFadeInUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .mz-animate-in {
+    animation: mzFadeInUp 0.5s ease-out forwards;
+  }
+  /* Убираем любые браузерные тени и лишние обводки у кнопок ответов */
+  .quiz-option-btn {
+    box-shadow: none !important;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+</style>
+
+<div id="medscan-quiz-wrapper" class="min-h-screen bg-brand-secondary text-brand-text selection:bg-white/50 py-6 sm:py-8 md:py-12">
+  <div class="max-w-3xl mx-auto px-4">
+    
+    <!-- Шапка с идеально центрированным крестиком и обновленными размерами лого -->
+    <div class="relative flex items-center justify-center mb-6 sm:mb-8 md:mb-10 min-h-[50px] sm:min-h-[58px] md:min-h-[68px]">
+      <!-- Левая часть: лого Медскан прижат к центру -->
+      <div class="flex-1 flex justify-end pr-3 sm:pr-4 md:pr-5">
+        <img src="https://static.tildacdn.com/tild3538-6533-4566-b639-313061383664/medscan_hadassah_squ.svg" class="w-auto h-[50px] sm:h-[58px] md:h-[68px] block" alt="Medscan">
+      </div>
+      
+      <!-- Центр: крестик (всегда ровно посередине страницы) -->
+      <div class="absolute left-1/2 -translate-x-1/2 flex items-center justify-center h-full">
+        <span class="text-[20px] sm:text-[22px] md:text-[24px] font-semibold text-brand-border leading-none select-none">×</span>
+      </div>
+
+      <!-- Правая часть: лого Кофемания прижат к центру -->
+      <div class="flex-1 flex justify-start pl-3 sm:pl-4 md:pl-5">
+        <img src="https://static.tildacdn.com/tild3264-3965-4435-a361-376138633631/svg_1778161093620.svg" class="w-auto h-[50px] sm:h-[58px] md:h-[68px] block object-contain" alt="Кофемания">
+      </div>
+    </div>
+
+    <div id="medscan-quiz-container"></div>
+
+  </div>
+</div>
+<script>
+  // Иконки SVG
+  const ICONS = {
+    arrowRight: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>`,
+    chevronRight: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>`,
+    chevronDown: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`,
+    check: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+    noticeIcon: `<svg width="100%" height="100%" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M46.7763 23.6843C46.7763 13.5467 38.5586 5.329 28.4211 5.329C18.2836 5.329 10.0658 13.5467 10.0658 23.6843C10.0658 29.1829 12.4835 34.1166 16.3176 37.4831L17.1017 38.1353L17.3191 38.3366C17.5166 38.5534 17.6594 38.8168 17.7308 39.1044C17.9163 39.8527 18.1137 40.5882 18.3067 41.2716L18.8549 43.1312C19.0224 43.6782 19.4409 44.0064 19.9165 44.0564C21.4962 44.2208 24.2145 44.4079 28.4211 44.4079C32.6265 44.4079 35.3458 44.2208 36.9257 44.0564L37.1014 44.024C37.5022 43.9202 37.8408 43.6107 37.9873 43.1335V43.1289C38.3984 41.7969 38.775 40.4544 39.1137 39.1021L39.2085 38.8223C39.3255 38.5541 39.5079 38.3178 39.7405 38.1353C44.0274 34.7723 46.7763 29.5494 46.7763 23.6843ZM50.329 23.6843C50.329 30.4644 47.2402 36.518 42.4073 40.5338C42.0919 41.7554 41.7547 42.9711 41.3826 44.1767C40.8596 45.8795 39.4697 47.2065 37.6635 47.5373L37.2957 47.5905C35.5762 47.7695 32.7313 47.9606 28.4211 47.9606C25.1877 47.9606 22.7795 47.8518 21.0521 47.7223L19.5464 47.5905C17.562 47.3823 16.0172 45.9925 15.4595 44.1743L14.8882 42.2384C14.7351 41.6965 14.5799 41.1216 14.428 40.5315C9.59932 36.5158 6.51318 30.4622 6.51318 23.6843C6.51318 11.5847 16.3215 1.77637 28.4211 1.77637C40.5207 1.77637 50.329 11.5847 50.329 23.6843Z" fill="currentColor"/><path d="M37.6169 44.0078C38.5921 44.1136 39.2975 44.9894 39.192 45.9645L38.8127 49.4709C38.5347 52.0346 36.6959 54.3585 33.8838 54.7282C32.4749 54.9128 30.6392 55.0658 28.4207 55.0658C26.0876 55.0658 24.2766 54.898 22.9461 54.6958C20.4986 54.3252 18.8887 52.3803 18.4775 50.2018V50.1972C18.2667 49.0686 18.0135 47.6391 17.7698 46.0663C17.6196 45.0971 18.2834 44.1885 19.2524 44.0379C20.2215 43.8877 21.1301 44.9894 21.2808 45.5205C21.5175 47.0482 21.7642 48.441 21.97 49.5426L22.0579 49.8849C22.3077 50.6374 22.8596 51.0889 23.4781 51.1825C24.6247 51.3568 26.2589 51.5132 28.4207 51.5132C30.4767 51.5132 32.1564 51.3714 33.4213 51.2056C34.3595 51.082 35.1511 50.2856 35.2808 49.087L35.6602 45.5829C35.7659 44.6077 36.6417 43.9023 37.6169 44.0078ZM38.4865 22.5001C38.4865 16.9407 33.9801 12.4343 28.4207 12.4343C27.4399 12.4341 26.6444 11.6389 26.6444 10.6579C26.6444 9.67702 27.4399 8.88181 28.4207 8.88163C35.9422 8.88163 42.0392 14.9786 42.0392 22.5001C42.0392 23.4811 41.2439 24.2764 40.2629 24.2764C39.282 24.2762 38.4865 23.481 38.4865 22.5001Z" fill="currentColor"/></svg>`,
+    helpIcon: `<svg width="100%" height="100%" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_193_1051)"><path d="M38.343 32.1914C39.1533 31.6392 40.2582 31.8485 40.8109 32.6586C43.781 37.0122 44.1744 41.3467 42.8786 45.4143C41.6174 49.3733 38.7988 52.9567 35.5883 56.0838C35.1998 56.4622 34.6599 56.6434 34.122 56.5741C33.5843 56.5048 33.1066 56.1942 32.8267 55.7299L24.7084 42.2502C24.2022 41.4099 24.4718 40.3163 25.3121 39.8101C26.1523 39.3041 27.2437 39.5759 27.7499 40.4161L34.6771 51.9159C36.9448 49.4511 38.6711 46.9145 39.4925 44.3365C40.4602 41.2991 40.224 38.1008 37.8758 34.6593C37.3233 33.8489 37.5328 32.7442 38.343 32.1914ZM11.4277 13.9656C15.4956 12.6697 19.8318 13.0604 24.1857 16.0311C24.996 16.584 25.2035 17.6909 24.6506 18.5013C24.0975 19.3111 22.9929 19.5189 22.1827 18.9662C18.7416 16.6184 15.5448 16.3822 12.5078 17.3494C9.92951 18.1708 7.38882 19.8946 4.92377 22.1626L16.4259 29.0921C17.2661 29.5982 17.5377 30.6896 17.0319 31.5299C16.5258 32.37 15.4343 32.6415 14.5941 32.1359L1.11441 24.0152C0.649849 23.7354 0.337208 23.2579 0.26788 22.72C0.19875 22.1823 0.379938 21.642 0.758217 21.2536C3.88507 18.0435 7.46907 15.227 11.4277 13.9656Z" fill="currentColor"/><path d="M45.4391 0.285625C47.857 0.388955 49.9446 0.81612 51.4295 1.21541C52.174 1.41562 52.7735 1.60901 53.192 1.75664C53.4013 1.83048 53.5662 1.89413 53.6823 1.93936C53.7397 1.96174 53.7856 1.97908 53.8188 1.99255C53.8354 1.99932 53.8501 2.00448 53.8604 2.00874C53.8652 2.01075 53.8686 2.01427 53.872 2.01568L53.8766 2.018C53.8773 2.01828 53.879 2.01786 53.4788 2.96398L53.8812 2.018C54.3062 2.19796 54.645 2.53668 54.8249 2.96166V2.96629L54.8272 2.97091C54.8285 2.97411 54.83 2.97802 54.8318 2.98248C54.8361 2.99274 54.8436 3.00747 54.8503 3.02411C54.8638 3.05728 54.8812 3.10317 54.9035 3.16057C54.9488 3.27671 55.0124 3.44152 55.0862 3.65091C55.2338 4.06916 55.4274 4.66725 55.6275 5.41104C56.0268 6.8961 56.4539 8.98544 56.5573 11.4038C56.7638 16.2418 55.672 22.5015 50.4049 27.7838L50.4072 27.7861C47.9971 30.2839 44.2514 32.7931 40.1726 35.2638C39.2887 35.7992 38.3785 36.3338 37.4572 36.8736C37.438 36.8866 37.4167 36.896 37.3971 36.9083C36.191 37.6145 34.9639 38.3285 33.7311 39.0385C31.5299 40.3062 29.3192 41.5775 27.1833 42.8571C26.4846 43.2756 25.5898 43.1645 25.0138 42.5888L14.2541 31.8291C13.6787 31.2537 13.5686 30.3605 13.9858 29.6619C16.4533 25.5298 19.13 20.6975 21.5629 16.6842C24.0387 12.6001 26.5571 8.84548 29.0544 6.43566C34.337 1.16753 40.6007 0.0790413 45.4391 0.285625ZM21.8104 23.2667C20.4791 25.5706 19.1336 27.9139 17.735 30.2864L26.5519 39.1032C28.3421 38.0454 30.1639 36.9927 31.9571 35.96C32.4982 35.6484 33.0351 35.3343 33.5692 35.0256L21.8104 23.2667ZM45.2864 3.83594C41.0978 3.65711 35.9213 4.59482 31.5454 8.97061L31.5223 8.99374C29.3915 11.05 27.0792 14.4413 24.6021 18.5276C24.2869 19.0475 23.9797 19.5742 23.6677 20.1003L36.7379 33.1706C37.2754 32.8522 37.8101 32.5427 38.3315 32.2269C42.1586 29.9088 45.3687 27.7385 47.449 25.7207L47.8723 25.2974L48.6517 24.4671C52.3596 20.2775 53.1745 15.4832 53.0069 11.5564C52.9173 9.45816 52.5466 7.63242 52.1974 6.33389C52.0552 5.80503 51.9135 5.36831 51.8019 5.03866C51.4724 4.92714 51.0346 4.78743 50.5067 4.64546C49.2082 4.29634 47.3842 3.92551 45.2864 3.83594Z" fill="currentColor"/></g><defs><clipPath id="clip0_193_1051"><rect width="56.8421" height="56.8421" fill="white"/></clipPath></defs></svg>`,
+    deepIcon: `<svg width="100%" height="100%" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M49.7368 28.421V17.7631H39.0789C38.0979 17.7631 37.3026 16.9678 37.3026 15.9868C37.3026 15.0057 38.0979 14.2104 39.0789 14.2104H51.5131C52.4942 14.2104 53.2894 15.0057 53.2894 15.9868V28.421C53.2894 29.402 52.4942 30.1973 51.5131 30.1973C50.5321 30.1973 49.7368 29.402 49.7368 28.421Z" fill="currentColor"/><path d="M48.4809 16.5072C49.1746 15.8135 50.299 15.8135 50.9927 16.5072C51.6864 17.2009 51.6864 18.3253 50.9927 19.019L35.7414 34.2703C35.2468 34.7648 34.6597 35.1567 34.0136 35.4245C33.367 35.6924 32.6736 35.8315 31.9737 35.8315C31.2737 35.8315 30.5803 35.6924 29.9337 35.4245C29.2876 35.1567 28.7005 34.7648 28.2059 34.2703L22.5717 28.6361C22.4069 28.4714 22.211 28.3413 21.9958 28.2521C21.7802 28.1628 21.5491 28.1157 21.3158 28.1157C21.0825 28.1157 20.8513 28.1628 20.6358 28.2521C20.4205 28.3413 20.2246 28.4714 20.0598 28.6361L6.58483 42.1111C5.89113 42.8048 4.7667 42.8048 4.07301 42.1111C3.37931 41.4174 3.37931 40.293 4.07301 39.5993L17.548 26.1243C18.0426 25.6298 18.6297 25.2379 19.2758 24.9701C19.9224 24.7022 20.6158 24.563 21.3158 24.563C22.0157 24.563 22.7091 24.7022 23.3557 24.9701C24.0018 25.2379 24.5889 25.6298 25.0835 26.1243L30.7177 31.7585C30.8825 31.9232 31.0784 32.0532 31.2937 32.1424C31.5092 32.2317 31.7404 32.2789 31.9737 32.2789C32.207 32.2789 32.4381 32.2317 32.6536 32.1424C32.8689 32.0532 33.0648 31.9232 33.2296 31.7585L48.4809 16.5072Z" fill="currentColor"/></svg>`,
+    copy: `<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19.5016 9.22448C19.5016 8.56388 18.9708 8.036 18.3268 8.036H10.2848L10.1696 8.04186C10.0542 8.0535 9.94098 8.08203 9.83362 8.12682C9.69049 8.18661 9.56012 8.27458 9.4508 8.38463C9.34155 8.49466 9.25472 8.62495 9.19592 8.76842C9.13714 8.91185 9.10743 9.06556 9.10803 9.22057V19.3124C9.10823 19.9727 9.63906 20.4998 10.2828 20.4999H18.3248C18.4799 20.4995 18.6338 20.4688 18.777 20.409C18.9201 20.3493 19.0495 20.2613 19.1588 20.1512C19.2681 20.0412 19.3549 19.911 19.4137 19.7674C19.4725 19.624 19.5022 19.4703 19.5016 19.3153V9.22448ZM21.0016 19.3085C21.003 19.6605 20.9358 20.01 20.8024 20.3358C20.6688 20.6618 20.4715 20.9589 20.2233 21.2089C19.9751 21.4587 19.68 21.6571 19.3551 21.7928C19.03 21.9286 18.681 21.999 18.3287 21.9999H10.2828C8.80105 21.9998 7.60823 20.7915 7.60803 19.3124V9.22448C7.60692 8.87318 7.67504 8.52515 7.80823 8.20006C7.94182 7.87408 8.13808 7.57696 8.38635 7.32702C8.63462 7.07708 8.93043 6.87881 9.25549 6.74303C9.5804 6.60737 9.92879 6.53694 10.2809 6.536H18.3268C19.8088 6.536 21.0016 7.74507 21.0016 9.22448V19.3085Z" fill="currentColor"/><path d="M14.8916 7.28613V4.68848C14.8916 4.37184 14.7666 4.06856 14.5459 3.84668C14.4373 3.73718 14.3074 3.64924 14.165 3.58984C14.0583 3.54536 13.9457 3.51731 13.8311 3.50586L13.7158 3.5H5.67285C5.36314 3.50005 5.06565 3.62432 4.84668 3.8457C4.62435 4.07002 4.49848 4.37362 4.49805 4.68945V14.7764C4.49814 15.0929 4.62319 15.3954 4.84375 15.6172C5.06524 15.8399 5.3634 15.9638 5.67285 15.9639H8.3584C8.77241 15.9641 9.10833 16.2998 9.1084 16.7139C9.1084 17.128 8.77245 17.4637 8.3584 17.4639H5.67285C4.96045 17.4638 4.28069 17.178 3.78027 16.6748C3.27903 16.1708 2.99814 15.4876 2.99805 14.7764V4.68652L3.01172 4.42188C3.07307 3.80858 3.34266 3.2316 3.78027 2.79004C4.28116 2.28386 4.96296 2.00005 5.67285 2H13.7178L13.9805 2.01367C14.2423 2.03986 14.4994 2.10433 14.7432 2.20605C15.0675 2.34143 15.3618 2.53965 15.6094 2.78906C16.1107 3.29318 16.3916 3.97711 16.3916 4.68848V7.28613C16.3915 7.70029 16.0558 8.03613 15.6416 8.03613C15.2276 8.03589 14.8917 7.70014 14.8916 7.28613Z" fill="currentColor"/></svg>`,
+    copyCheck: `<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19.4697 6.46967C19.7626 6.17678 20.2373 6.17678 20.5302 6.46967C20.8231 6.76256 20.8231 7.23732 20.5302 7.53022L10.5302 17.5302C10.2373 17.8231 9.76256 17.8231 9.46967 17.5302L4.46967 12.5302C4.17678 12.2373 4.17678 11.7626 4.46967 11.4697C4.76256 11.1768 5.23732 11.1768 5.53022 11.4697L9.99994 15.9394L19.4697 6.46967Z" fill="currentColor"/></svg>`,
+    energoletieText: `<svg class="w-[195px] h-[12px] sm:w-[227px] sm:h-[14px] md:w-[260px] md:h-[16px]" viewBox="0 0 1285 79" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M615.217 0.865534C632.056 -0.281497 668.303 -1.60335 682.661 6.36749C700.101 16.0471 701.214 57.1983 685.656 69.6224C678.38 75.4326 673.62 76.3023 664.525 78.1487C646.423 78.6944 610.246 81.6711 594.237 71.9749C587.738 67.4495 583.517 58.9132 582.74 51.3167C579.746 22.0606 584.444 5.31683 615.217 0.865534ZM666.009 14.5648C651.926 12.731 626.306 12.9219 617.495 13.9446C597.548 16.689 594.828 28.2854 596.629 46.5071C597.133 51.6295 600.065 59.3133 604.674 62.4066C617.363 68.5335 647.659 66.0838 661.576 65.6829C680.737 62.3195 683.898 50.4551 681.664 32.4593C681.136 28.219 679.92 24.8157 677.909 21.6888C675.284 17.6083 670.82 15.1912 666.009 14.5648Z" fill="currentColor"/><path d="M855.26 1.45645C860.894 0.786242 874.713 1.08736 880.779 1.08913L928.436 1.13416V13.7268C918.07 13.7943 854.724 7.41701 843.781 22.0708C839.721 27.5079 847.113 32.7478 853.893 33.0066C873.668 33.7615 914.797 33.1472 922.723 33.132V45.4333H860.073C857.733 45.3547 850.563 44.9273 848.638 45.3953C839.416 47.6332 840.876 52.7722 844.848 57.4387C849.605 63.0262 857.089 65.2173 864.418 65.5832C885.092 66.6151 909.358 65.9405 929.018 65.7992V78.0378C910.201 77.9963 851.26 81.9381 840.019 72.2832C819.675 54.8127 819.03 8.63184 855.26 1.45645Z" fill="currentColor"/><path d="M270.827 1.48087C276.46 0.810656 290.279 1.11178 296.346 1.11354L344.002 1.15857V13.7513C333.637 13.8188 270.29 7.44142 259.347 22.0952C255.287 27.5323 262.679 32.7722 269.46 33.031C289.235 33.7859 330.363 33.1716 338.289 33.1564V45.4577H275.639C273.299 45.3791 266.129 44.9518 264.204 45.4198C254.982 47.6576 256.442 52.7966 260.415 57.4631C265.172 63.0507 272.656 65.2417 279.985 65.6076C300.659 66.6395 324.925 65.9649 344.585 65.8236V78.0622C325.768 78.0207 266.827 81.9625 255.586 72.3076C235.241 54.8371 234.596 8.65625 270.827 1.48087Z" fill="currentColor"/><path d="M1210.46 1.46231C1216.09 0.792101 1229.91 1.09322 1235.98 1.09499L1283.63 1.14002V13.7327C1273.27 13.8002 1209.92 7.42287 1198.98 22.0767C1194.92 27.5137 1202.31 32.7536 1209.09 33.0125C1228.87 33.7674 1270 33.153 1277.92 33.1379V45.4392H1215.27C1212.93 45.3606 1205.76 44.9332 1203.84 45.4012C1194.61 47.639 1196.07 52.7781 1200.05 57.4446C1204.8 63.0321 1212.29 65.2232 1219.62 65.589C1240.29 66.621 1264.56 65.9464 1284.22 65.805V78.0436C1265.4 78.0021 1206.46 81.9439 1195.22 72.289C1174.87 54.8186 1174.23 8.6377 1210.46 1.46231Z" fill="currentColor"/><path d="M54.7393 0.846923C66.5575 0.596146 85.651 0.589959 94.3302 9.25764C110.804 25.7798 108.661 73.475 80.3255 76.69C54.4797 79.6225 26.254 78.1965 0.0108011 78.0358V65.8095C17.59 65.7785 59.8132 68.3138 78.4742 63.3649C82.0359 62.4203 85.1217 60.1094 86.9016 56.8829C88.337 54.281 89.0441 51.5476 88.1134 48.7019C87.6477 47.2778 86.3961 46.3285 84.9142 46.1076C73.9094 44.4674 33.8118 45.3901 25.0372 45.4428V33.077L84.6645 33.0754C87.2255 33.0753 89.1445 30.684 88.4104 28.2305C83.7525 12.6612 76.5064 14.4205 58.5371 13.5235C53.9074 13.2921 49.0579 13.5235 44.4062 13.5376L0.00198926 13.7142C-0.0245012 9.68237 0.220093 5.09599 0.34813 1.02176C18.299 1.05531 36.8458 1.29373 54.7393 0.846923Z" fill="currentColor"/><path d="M1140.61 4.4381C1144.53 1.74736 1149.3 0.249999 1153.97 1.13153C1171.09 4.36406 1167.06 22.8845 1166.77 39.7497C1166.56 52.4863 1166.47 65.2256 1166.49 77.964H1152.06V12.5934C1133.56 27.235 1098.67 67.896 1080.08 76.7959C1077.99 77.7958 1075.66 78.1555 1073.35 77.9964C1053.47 76.6264 1056.92 58.0755 1057.1 41.8275L1057.4 1.22639H1072.38L1072.44 67.1135C1092.88 51.2637 1119.51 18.9422 1140.61 4.4381Z" fill="currentColor"/><path d="M417.426 0.91665L421.002 0.774474C433.715 0.32237 449.109 0.241122 459.033 9.56136C469.194 19.1041 469.501 38.096 459.607 47.947C456.603 50.9015 452.887 53.0313 448.819 54.1307C436.682 57.5074 398.088 56.0707 382.907 56.0354C385.985 51.9444 390.038 47.3756 393.392 43.4065C408.33 43.4065 429.622 45.4851 443.941 41.251C452.612 38.6879 454.786 30.6881 451.162 23.2567C449.976 20.8249 448.011 18.8391 445.661 17.4984C436.864 12.4799 426.081 13.5301 415.947 13.4934C401.971 13.4422 387.957 13.6268 373.978 13.7195V78.0472H359.399L359.229 1.22482C378.341 1.21864 398.398 1.48973 417.426 0.91665Z" fill="currentColor"/><path d="M119.931 1.22525H134.681L134.668 32.8107H211.563V1.22525H226.247C226.405 26.8045 226.364 52.3845 226.124 77.9629H211.563L211.627 45.4396H134.631L134.68 77.9629H119.931V1.22525Z" fill="currentColor"/><path d="M749.767 3.68141C752.563 1.51221 756.074 0.517226 759.612 0.463712C765.262 0.378258 771.303 0.915984 774.963 5.10489C781.639 12.7562 787.078 22.4491 792.597 31.0055L822.946 77.9581L805.895 78.0711L765.798 15.8933C765.412 15.2941 764.947 14.7326 764.31 14.4125C762.394 13.4503 760.066 13.7391 758.462 15.1617C747.869 24.5585 722.616 68.0309 716.499 77.9625H699.13L725.25 36.4343C732.554 24.8318 738.973 12.0558 749.767 3.68141Z" fill="currentColor"/><path d="M939.54 1.02212L1043.75 1.14045V13.651L999.003 13.719V77.9628H984.283V13.651L939.293 13.7146L939.54 1.02212Z" fill="currentColor"/><path d="M501.847 1.53896C519.313 0.0166377 554.14 1.11335 572.807 1.14073V13.6672C553.212 13.3564 533.415 12.65 513.865 13.835C509.219 14.1171 503.706 14.622 499.728 17.1764C497.019 18.9153 495.864 22.1445 495.549 25.3476C494.254 38.5494 495.195 67.3747 495.218 77.9631H480.823C481.013 59.3906 478.981 36.7236 481.647 18.2774C483.117 8.10244 492.507 3.71736 501.847 1.53896Z" fill="currentColor"/></svg>`
+  };
+
+  // Данные опроса
+  const questions = [
+    { title: "Кто вы сегодня в Кофемании?", options: [{ text: "☕ заскочил за кофе и побежал", category: "coffee" }, { text: "🥐 перекусить перед делами", category: "fuel" }, { text: "👥 встреча / переговоры", category: "brain" }, { text: "🍰 живу свою лучшую жизнь", category: "bio" }] },
+    { title: "Что из этого больше похоже на ваше утро?", options: [{ text: "☕ сначала кофе, потом можно подумать о завтраке", category: "coffee" }, { text: "🥐 быстрый завтрак перед делами", category: "fuel" }, { text: "🍳 спокойный завтрак — роскошный максимум", category: "bio" }, { text: "🚶 иногда завтрак случается уже ближе к обеду", category: "fuel" }] },
+    { title: "Кофе в вашей жизни чаще всего…", options: [{ text: "☕ первый пункт в утреннем расписании", category: "coffee" }, { text: "☕ способ пережить день", category: "coffee" }, { text: "☕ приятное дополнение к завтраку", category: "bio" }, { text: "☕ повод встретиться", category: "bio" }, { text: "☕ не пью кофе", category: "bio" }] },
+    { title: "В какой момент дня обычно начинает садиться батарейка?", options: [{ text: "🔋 кажется, я в целом, не зарядился", category: "brain" }, { text: "🕙 ближе к 11", category: "fuel" }, { text: "🍽 после обеда", category: "sweet" }, { text: "🕒 к 15–16", category: "coffee" }, { text: "🌙 вечером", category: "fuel" }, { text: "⚡ держится до вечера", category: "bio" }] },
+    { title: "В какой момент дня десерт кажется особенно хорошей идеей?", options: [{ text: "🍪 сразу после еды", category: "sweet" }, { text: "🍪 во второй половине дня", category: "sweet" }, { text: "🍪 вечером", category: "sweet" }, { text: "🍪 всегда", category: "sweet" }] },
+    { title: "После хорошего обеда, по закону Архимеда…", options: [{ text: "😴 хочется немного поспать", category: "sweet" }, { text: "☕ или хотя бы кофе", category: "coffee" }, { text: "🍰 или хотя бы десерт", category: "sweet" }, { text: "🙂 всё отлично", category: "bio" }] },
+    { title: "Бывает ли у вас что-то из этого?", options: [{ text: "🌫 иногда как будто «туман в голове»", category: "brain" }, { text: "😤 всё начинает раздражать", category: "brain" }, { text: "😟 тревожность без понятной причины", category: "brain" }, { text: "😵 сложно сосредоточиться", category: "brain" }, { text: "🧠 обычно всё работает отлично", category: "bio" }] },
+    { title: "Как у вас сейчас со сном?", options: [{ text: "😴 засыпаю быстро", category: "bio" }, { text: "⏳ иногда долго считаю мысли вместо овец", category: "brain" }, { text: "🌙 просыпаюсь ночью", category: "brain" }, { text: "🥱 утром кажется, что я только лёг", category: "coffee" }] },
+    { title: "Если честно, ваш режим питания сейчас скорее…", options: [{ text: "🍽 всё по расписанию", category: "bio" }, { text: "🍪 перекусы между делами", category: "sweet" }, { text: "⏳ вспоминаю о еде, когда уже сильно проголодался", category: "fuel" }, { text: "🏃 ем на бегу", category: "fuel" }] }
+  ];
+
+  const resultsData = {
+    coffee: { title: "☕ Кофейный двигатель", desc: "Твой организм работает на кофе как старый итальянский мотор. Утро начинается с эспрессо, день продолжается капучино, а к вечеру уже сложно понять — это энергия или просто кофеин.", noticed: ["кофе часто раньше еды", "энергия скачет", "иногда появляется тревожность"], reason: "Такое бывает, когда ритм сбивается и организму не хватает стабильной опоры.", help: ["кофе после еды", "добавить белок утром"], now: ["сытные завтраки с белком", "что-то, что держит энергию дольше, чем кофе"], deep: "Иногда за такими состояниями стоят внутренние процессы, которые не всегда очевидны. Можно посмотреть на это подробнее — через функциональную диагностику и чекап «Профиль энерголетия».", linkText: "Узнать больше" },
+    sweet: { title: "🧁 Сладенький пирожочек", desc: "Сахар — твой быстрый способ вернуть себе энергию. Но эффект, как правило, ненадолго.", noticed: ["тянет на сладкое", "энергия падает через 1–2 часа", "десерт часто идёт «к кофе»"], reason: "Так бывает, когда энергии не хватает на базовом уровне, и организм ищет быстрые решения.", help: ["начинать еду с белка", "добавлять больше клетчатки", "не есть сладкое на пустой желудок"], now: ["более сбалансированные блюда", "комбинации, которые не дают резких скачков"], deep: "Если интересно понять, почему так происходит, можно чуть глубже посмотреть на работу организма и собрать более целостную картину.", linkText: "Посмотреть формат чекапа" },
+    brain: { title: "🧠 Перегретый процессор", desc: "Похоже, сейчас открыто слишком много вкладок.", noticed: ["«туман» в голове", "сложно сосредоточиться", "ощущение перегруза"], reason: "Так бывает, когда ритм становится слишком плотным, а восстановление не успевает за ним.", help: ["регулярные приемы пищи", "чуть больше плотной, «собирающей» еды", "немного больше сна"], now: ["тёплые, насыщенные блюда", "еда, после которой не хочется срочно кофе"], deep: "Если хочется снизить этот перегруз глубже, можно посмотреть, как сейчас распределяется ресурс внутри организма.", linkText: "Подробнее о чекапе (Промокод)" },
+    bio: { title: "🧬 Биохакер выходного дня", desc: "Ты уже обращаешь внимание на себя и свои привычки. И это заметно.", noticed: ["интерес к питанию", "внимание к самочувствию"], reason: "Иногда при этом всё равно не хватает системности — и результат «плавает».", help: ["регулярность", "баланс в рационе", "чуть больше устойчивого режима"], now: ["понятные, сбалансированные блюда", "еда без перегрузки"], deep: "Если захочется точнее настроить себя — можно дополнить это понимание данными и собрать более персональную картину.", linkText: "Настроить через чекап" },
+    fuel: { title: "🥐 Резервное топливо", desc: "Похоже, организм иногда работает на остатках ресурса.", noticed: ["пропуски еды", "перекусы вместо нормальных приёмов пищи", "сильный голод к вечеру"], reason: "Так бывает, когда в течение дня не хватает стабильного питания.", help: ["2–3 нормальных приёма пищи", "больше белка", "не заменять еду кофе"], now: ["плотные приёмы пищи", "еда, которая даёт ощущение сытости"], deep: "Если хочется быстрее выровнять состояние, можно разобраться, что именно сейчас влияет на уровень энергии.", linkText: "Посмотреть варианты чекапа" }
+  };
+
+  // Основная логика (сохранены методы и правила красной зоны)
+  window.medscanQuiz = {
+    step: 'intro',
+    currentQuestionIndex: 0,
+    answers: [],
+
+    render: function() {
+      const container = document.getElementById('medscan-quiz-container');
+      if (!container) return;
+
+      if (this.step === 'intro') {
+        container.innerHTML = `
+          <div class="bg-white rounded-[24px] sm:rounded-[28px] md:rounded-[32px] p-6 sm:p-8 md:p-12 shadow-[0_8px_32px_rgba(30,47,94,0.06)] mz-animate-in">
+            <div class="flex justify-center mb-4 sm:mb-5 md:mb-6 text-brand-accent1">${ICONS.energoletieText}</div>
+            
+            <h1 class="text-[32px] sm:text-[40px] md:text-[48px] font-normal tracking-[-0.01em] mb-6 sm:mb-7 md:mb-8 leading-[1.1] text-brand-accent1 m-0">Как сейчас устроена ваша энергия?</h1>
+            
+            <div class="space-y-4 sm:space-y-5 md:space-y-6 text-brand-muted leading-[1.5] mb-8 sm:mb-9 md:mb-10 text-[14px] sm:text-[16px] md:text-[18px] font-normal tracking-[-0.02em]">
+              <p class="m-0"><strong class="text-brand-accent1 font-semibold">Medscan Hadassah</strong> — инновационная клиника с израильскими стандартами медицины и подходом к здоровью через раннюю диагностику и профилактику.</p>
+              <p class="m-0">Совместно с <strong class="text-brand-accent1 font-semibold">Кофеманией</strong> мы разработали меню «Энерголетие» — подход к еде, который помогает поддерживать устойчивую энергию в течение дня.</p>
+              
+              <div class="bg-brand-secondary p-4 sm:p-6 md:p-8 rounded-[16px] sm:rounded-[24px] md:rounded-[32px] text-brand-cardtext text-[16px] sm:text-[17px] md:text-[18px] font-normal tracking-[-0.02em] leading-[1.5]">
+                <span class="text-brand-accent1">«Энерголетие»</span> — бренд Медскан в направлении <span class="text-brand-accent1">превентивной медицины</span> и управления здоровьем, посвященный тому, как можно дольше сохранять молодость, <span class="text-brand-accent1">высокий уровень энергии</span>, ясность мышления и качество жизни.
+              </div>
+
+              <p class="m-0">Чтобы понять, как сейчас устроена ваша энергия, предлагаем пройти короткую анкету. Она займет пару минут. В результате вы получите свой текущий профиль энергии и ориентиры, на что сейчас стоит обратить внимание.</p>
+            </div>
+            
+            <details class="group bg-[#FAFAFA] border border-brand-border/50 rounded-[20px] p-5 mb-8 cursor-pointer transition-all">
+              <summary class="flex justify-between items-center font-semibold text-[16px] sm:text-[18px] text-brand-accent1 outline-none list-none marker:hidden select-none [&::-webkit-details-marker]:hidden" style="list-style-type: none;">
+                Как работает маршрут Энерголетия?
+                <div class="w-5 h-5 text-brand-accent2 transition-transform duration-300 group-open:rotate-180">${ICONS.chevronDown}</div>
+              </summary>
+              <div class="text-left mt-6">
+                <h3 class="text-[20px] sm:text-[24px] font-semibold tracking-[-0.01em] text-brand-accent1 mb-2 m-0 leading-[1.2]">Сколько лет вы планируете быть таким же — или лучше?</h3>
+                <p class="text-[14px] sm:text-[16px] text-brand-muted mb-8 leading-[1.5] m-0">Энерголетие — маршрут для тех, кто хочет не просто чувствовать себя нормально, а понимать, что именно работает для его организма. И управлять этим.</p>
+                
+                <div class="relative border-l-2 border-[#D8DFF3] ml-5 space-y-6 sm:space-y-8 pb-4">
+                  <div class="relative pl-8 sm:pl-10">
+                    <div class="absolute -left-[13px] top-0 w-[24px] h-[24px] rounded-full bg-[#1E2F5E] border-[3px] border-[#D8DFF3] flex items-center justify-center text-[13px] font-normal text-white shadow-sm leading-none">1</div>
+                    <h4 class="text-[16px] sm:text-[18px] font-semibold text-brand-accent1 m-0 mb-1 leading-[1.2]">Попробуйте меню</h4>
+                    <p class="text-[13px] sm:text-[15px] text-brand-muted m-0 leading-[1.4]">Еда под ваше состояние прямо сейчас — фокус, энергия, восстановление. Создано с нутрициологами Medscan Hadassah.</p>
+                  </div>
+                  <div class="relative pl-8 sm:pl-10">
+                    <div class="absolute -left-[13px] top-0 w-[24px] h-[24px] rounded-full bg-[#1E2F5E] border-[3px] border-[#D8DFF3] flex items-center justify-center text-[13px] font-normal text-white shadow-sm leading-none">2</div>
+                    <h4 class="text-[16px] sm:text-[18px] font-semibold text-brand-accent1 m-0 mb-1 leading-[1.2] flex flex-wrap gap-2 items-center">Сдайте Профиль Энерголетия <a href="#" class="text-[12px] bg-brand-secondary text-brand-accent2 px-2 py-0.5 rounded-full no-underline hover:opacity-80 transition-opacity">Перейти</a></h4>
+                    <p class="text-[13px] sm:text-[15px] text-brand-muted m-0 leading-[1.4]">35+ маркеров крови, которые стандартный чекап не видит. Ваша личная картина энергии, воспаления и восстановления.</p>
+                  </div>
+                  <div class="relative pl-8 sm:pl-10">
+                    <div class="absolute -left-[13px] top-0 w-[24px] h-[24px] rounded-full bg-[#1E2F5E] border-[3px] border-[#D8DFF3] flex items-center justify-center text-[13px] font-normal text-white shadow-sm leading-none">3</div>
+                    <h4 class="text-[16px] sm:text-[18px] font-semibold text-brand-accent1 m-0 mb-1 leading-[1.2] flex flex-wrap gap-2 items-center">Получите биологический портрет <a href="#" class="text-[12px] bg-brand-secondary text-brand-accent2 px-2 py-0.5 rounded-full no-underline hover:opacity-80 transition-opacity">Записаться</a></h4>
+                    <p class="text-[13px] sm:text-[15px] text-brand-muted m-0 leading-[1.4]">Бесплатная онлайн-консультация превентолога входит в чекап. Узнайте, как работает ваш организм — и где утекает ресурс.</p>
+                  </div>
+                  <div class="relative pl-8 sm:pl-10">
+                    <div class="absolute -left-[13px] top-0 w-[24px] h-[24px] rounded-full bg-[#1E2F5E] border-[3px] border-[#D8DFF3] flex items-center justify-center text-[13px] font-normal text-white shadow-sm leading-none">4</div>
+                    <h4 class="text-[16px] sm:text-[18px] font-semibold text-brand-accent1 m-0 mb-1 leading-[1.2] flex flex-wrap gap-2 items-center">Уйдите с планом <a href="#" class="text-[12px] bg-brand-secondary text-brand-accent2 px-2 py-0.5 rounded-full no-underline hover:opacity-80 transition-opacity">Подробнее</a></h4>
+                    <p class="text-[13px] sm:text-[15px] text-brand-muted m-0 leading-[1.4]">Офлайн-встреча в Medscan Hadassah. Персональные интервенции, нутрицевтики и протоколы — включая флагманские решения уровня ОЭСР.</p>
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <button onclick="medscanQuiz.goForm()" class="w-full sm:w-auto bg-brand-grad hover:opacity-90 text-white text-[18px] sm:text-[19px] md:text-[20px] font-semibold tracking-[-0.01em] h-[48px] sm:h-auto py-0 sm:py-4 md:py-5 px-6 sm:px-8 md:px-10 rounded-[100px] transition-all flex items-center justify-center gap-3 group border-none cursor-pointer shadow-lg">
+              Начать анкету
+              <div class="w-5 h-5 sm:w-5 sm:h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform">${ICONS.arrowRight}</div>
+            </button>
+          </div>
+        `;
+      } 
+      
+      else if (this.step === 'form') {
+        container.innerHTML = `
+          <div class="bg-white rounded-[24px] sm:rounded-[28px] md:rounded-[32px] p-6 sm:p-8 md:p-12 shadow-[0_8px_32px_rgba(30,47,94,0.06)] mz-animate-in">
+            <div class="text-center">
+              <h2 class="text-[28px] sm:text-[38px] md:text-[48px] font-normal tracking-[-0.01em] mb-3 md:mb-4 m-0 text-brand-accent1 leading-[1.1]">Давайте познакомимся</h2>
+              <p class="text-brand-muted mb-6 sm:mb-8 md:mb-10 text-[16px] sm:text-[17px] md:text-[18px] font-normal tracking-[-0.02em] m-0 leading-[1.5]">Оставьте контакты для получения результатов.</p>
+            </div>
+            
+            <form onsubmit="medscanQuiz.submitOnlyMake(event)" class="space-y-4 md:space-y-5">
+              <div>
+                <label class="block text-[14px] sm:text-[15px] md:text-[16px] font-medium tracking-[-0.01em] text-brand-accent1 mb-2">Имя</label>
+                <input type="text" name="name" id="mz_name" oninput="medscanQuiz.checkForm()" class="w-full rounded-[16px] px-4 md:px-5 py-3 md:py-4 focus:ring-1 focus:ring-brand-focus focus:border-brand-focus transition-all text-[16px] font-normal tracking-[-0.02em]" placeholder="Иван" required />
+              </div>
+              <div>
+                <label class="block text-[14px] sm:text-[15px] md:text-[16px] font-medium tracking-[-0.01em] text-brand-accent1 mb-2">Номер для связи</label>
+                <input type="tel" name="phone" id="mz_phone" oninput="medscanQuiz.checkForm()" class="w-full rounded-[16px] px-4 md:px-5 py-3 md:py-4 focus:ring-1 focus:ring-brand-focus focus:border-brand-focus transition-all text-[16px] font-normal tracking-[-0.02em]" placeholder="+7 (999) 000-00-00" required />
+              </div>
+              <div>
+                <label class="block text-[14px] sm:text-[15px] md:text-[16px] font-medium tracking-[-0.01em] text-brand-accent1 mb-2">Электронная почта</label>
+                <input type="email" name="email" id="mz_email" class="w-full rounded-[16px] px-4 md:px-5 py-3 md:py-4 focus:ring-1 focus:ring-brand-focus focus:border-brand-focus transition-all text-[16px] font-normal tracking-[-0.02em]" placeholder="ivan@example.com" required />
+              </div>
+
+              <div class="pt-2 sm:pt-3 md:pt-4 space-y-3 md:space-y-4">
+                <label class="flex items-center gap-3 md:gap-4 cursor-pointer group m-0">
+                  <div class="relative flex items-center justify-center w-5 h-5 md:w-6 md:h-6 shrink-0">
+                    <input type="checkbox" id="mz_a1" onchange="medscanQuiz.checkForm()" class="peer sr-only" required />
+                    <div class="w-5 h-5 md:w-6 md:h-6 bg-brand-checkbox_bg rounded-[6px] peer-checked:bg-brand-accent1 transition-colors"></div>
+                    <div class="absolute inset-0 flex items-center justify-center text-white opacity-0 peer-checked:opacity-100 transition-opacity">
+                      <div class="w-3.5 h-3.5 md:w-4 md:h-4 flex items-center justify-center">${ICONS.check}</div>
+                    </div>
+                  </div>
+                  <span class="text-[13px] md:text-[14px] font-normal tracking-[-0.01em] text-brand-muted leading-tight">Я даю согласие на <a href="#" class="underline text-brand-accent1 font-semibold hover:opacity-80">обработку персональных данных</a></span>
+                </label>
+                
+                <label class="flex items-center gap-3 md:gap-4 cursor-pointer group m-0">
+                  <div class="relative flex items-center justify-center w-5 h-5 md:w-6 md:h-6 shrink-0">
+                    <input type="checkbox" id="mz_a2" onchange="medscanQuiz.checkForm()" class="peer sr-only" required />
+                    <div class="w-5 h-5 md:w-6 md:h-6 bg-brand-checkbox_bg rounded-[6px] peer-checked:bg-brand-accent1 transition-colors"></div>
+                    <div class="absolute inset-0 flex items-center justify-center text-white opacity-0 peer-checked:opacity-100 transition-opacity">
+                      <div class="w-3.5 h-3.5 md:w-4 md:h-4 flex items-center justify-center">${ICONS.check}</div>
+                    </div>
+                  </div>
+                  <span class="text-[13px] md:text-[14px] font-normal tracking-[-0.01em] text-brand-muted leading-tight">Я даю согласие на <a href="#" class="underline text-brand-accent1 font-semibold hover:opacity-80">передачу данных</a></span>
+                </label>
+
+                <label class="flex items-center gap-3 md:gap-4 cursor-pointer group m-0">
+                  <div class="relative flex items-center justify-center w-5 h-5 md:w-6 md:h-6 shrink-0">
+                    <input type="checkbox" id="mz_a3" name="subscribe" onchange="medscanQuiz.checkForm()" class="peer sr-only" />
+                    <div class="w-5 h-5 md:w-6 md:h-6 bg-brand-checkbox_bg rounded-[6px] peer-checked:bg-brand-accent1 transition-colors"></div>
+                    <div class="absolute inset-0 flex items-center justify-center text-white opacity-0 peer-checked:opacity-100 transition-opacity">
+                      <div class="w-3.5 h-3.5 md:w-4 md:h-4 flex items-center justify-center">${ICONS.check}</div>
+                    </div>
+                  </div>
+                  <span class="text-[13px] md:text-[14px] font-normal tracking-[-0.01em] text-brand-muted leading-tight">Я даю согласие на <a href="#" class="underline text-brand-accent1 font-semibold hover:opacity-80">получение рассылки</a></span>
+                </label>
+              </div>
+
+              <div class="pt-4 sm:pt-5 md:pt-6">
+                <button type="submit" id="mz_btn" disabled class="w-full bg-brand-border/60 cursor-not-allowed text-brand-muted text-[18px] sm:text-[19px] md:text-[20px] font-semibold tracking-[-0.01em] h-[48px] sm:h-[52px] md:h-auto py-0 md:py-5 px-8 md:px-10 rounded-[100px] transition-all border-none flex items-center justify-center">
+                  Начать анкету
+                </button>
+              </div>
+            </form>
+          </div>
+        `;
+      } 
+      
+      else if (this.step === 'quiz') {
+        const q = questions[this.currentQuestionIndex];
+        const progress = Math.round(((this.currentQuestionIndex + 1) / questions.length) * 100);
+        
+        let optionsHtml = '';
+        q.options.forEach(opt => {
+          optionsHtml += `
+            <button onclick="medscanQuiz.answer('${opt.category}')" class="quiz-option-btn text-left w-full px-3 py-3 sm:p-4 md:p-6 rounded-[16px] md:rounded-[20px] border-2 border-solid border-brand-secondary bg-white hover:border-brand-accent2 transition-all group flex items-center justify-between cursor-pointer !shadow-none outline-none">
+              <span class="text-[14px] sm:text-[16px] md:text-[18px] font-normal tracking-[-0.02em] text-brand-text m-0 block pr-4">${opt.text}</span>
+              <div class="w-5 h-5 md:w-6 md:h-6 text-brand-border group-hover:text-brand-accent2 transition-colors shrink-0">${ICONS.chevronRight}</div>
+            </button>
+          `;
+        });
+
+        container.innerHTML = `
+          <div class="mz-animate-in">
+            <div class="mb-6 sm:mb-7 md:mb-8">
+              <div class="flex justify-between text-[12px] sm:text-[13px] md:text-[14px] font-semibold tracking-[-0.01em] text-brand-muted mb-3 md:mb-4 px-1">
+                <span>Вопрос ${this.currentQuestionIndex + 1} из ${questions.length}</span>
+                <span>${progress}%</span>
+              </div>
+              <div class="w-full h-2.5 bg-brand-border/40 rounded-full overflow-hidden">
+                <div class="h-full bg-brand-grad rounded-full transition-all duration-500 ease-out" style="width: ${progress}%"></div>
+              </div>
+            </div>
+            
+            <div class="bg-white rounded-[24px] sm:rounded-[28px] md:rounded-[32px] p-6 sm:p-8 md:p-12 shadow-[0_8px_32px_rgba(30,47,94,0.06)]">
+              <h2 class="text-[28px] sm:text-[38px] md:text-[48px] font-normal tracking-[-0.01em] mb-6 sm:mb-8 md:mb-10 text-brand-accent1 leading-[1.1] m-0">${q.title}</h2>
+              <div class="flex flex-col gap-3 md:gap-4">
+                ${optionsHtml}
+              </div>
+            </div>
+          </div>
+        `;
+      } 
+      
+      else if (this.step === 'result') {
+        const result = this.calculateResult();
+        
+        let noticedHtml = result.noticed.map(item => `<li class="flex items-center gap-2 sm:gap-3 md:gap-4 text-brand-muted text-[14px] sm:text-[16px] md:text-[18px] font-normal tracking-[-0.02em] m-0 leading-tight"><span class="text-brand-accent2 font-bold select-none">•</span> <span>${item}</span></li>`).join('');
+        let helpHtml = result.help.map(item => `<li class="flex items-center gap-2 sm:gap-3 md:gap-4 text-brand-muted text-[14px] sm:text-[16px] md:text-[18px] font-normal tracking-[-0.02em] m-0 leading-tight"><span class="text-brand-accent1 font-semibold select-none">✓</span> <span>${item}</span></li>`).join('');
+        let nowHtml = result.now.map(item => `<li class="flex items-center gap-2 sm:gap-3 md:gap-4 text-brand-muted text-[14px] sm:text-[16px] md:text-[18px] font-normal tracking-[-0.02em] m-0 leading-tight"><span class="text-brand-border font-semibold select-none">—</span> <span>${item}</span></li>`).join('');
+
+        container.innerHTML = `
+          <div class="mz-animate-in">
+            <div class="text-center mb-8 sm:mb-10 md:mb-12">
+              <div class="flex justify-center mb-4 sm:mb-5 md:mb-6 text-brand-accent1">${ICONS.energoletieText}</div>
+              <div class="inline-block px-3 md:px-4 py-1.5 md:py-2 bg-white border border-brand-border/60 text-brand-accent1 rounded-[16px] text-[12px] sm:text-[13px] md:text-[14px] font-semibold tracking-[-0.01em] shadow-sm mb-4 sm:mb-5 md:mb-6">Ваш профиль энергии</div>
+              
+              <h1 class="text-[32px] sm:text-[40px] md:text-[48px] font-normal tracking-[-0.01em] text-brand-accent1 mb-4 md:mb-6 leading-[1.1] m-0">${result.title}</h1>
+              <p class="text-[14px] sm:text-[16px] md:text-[18px] font-normal tracking-[-0.02em] text-brand-muted max-w-2xl mx-auto m-0 leading-[1.5]">${result.desc}</p>
+            </div>
+
+            <!-- Сетка: заменена на flex для защиты от глобального класса .grid в Тильде -->
+            <div class="flex flex-col md:flex-row gap-6 sm:gap-7 md:gap-8 mb-6 sm:mb-7 md:mb-8 items-stretch w-full">
+              
+              <!-- Карточка "Мы заметили" -->
+              <div class="flex-1 w-full bg-white p-4 sm:p-[24px] md:p-[32px] rounded-[24px] sm:rounded-[28px] md:rounded-[32px] shadow-[0_8px_32px_rgba(30,47,94,0.06)] flex flex-col box-border">
+                <h3 class="text-[18px] sm:text-[21px] md:text-[24px] font-semibold tracking-[-0.01em] text-brand-accent1 mb-5 md:mb-6 flex items-center gap-2 md:gap-3 m-0 leading-[1.2]">
+                  <div class="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-brand-accent1">${ICONS.noticeIcon}</div> Мы заметили
+                </h3>
+                <ul class="space-y-3 sm:space-y-4 !mb-5 sm:!mb-6 md:!mb-8 p-0 list-none">${noticedHtml}</ul>
+                <div class="mt-auto bg-brand-secondary text-brand-accent1 px-4 py-2.5 sm:p-4 md:p-5 rounded-[16px] text-[14px] sm:text-[15px] md:text-[16px] font-normal tracking-[-0.01em] leading-[1.5] m-0">${result.reason}</div>
+              </div>
+
+              <!-- Карточка "Что может помочь" -->
+              <div class="flex-1 w-full bg-white p-4 sm:p-[24px] md:p-[32px] rounded-[24px] sm:rounded-[28px] md:rounded-[32px] shadow-[0_8px_32px_rgba(30,47,94,0.06)] flex flex-col box-border">
+                <h3 class="text-[18px] sm:text-[21px] md:text-[24px] font-semibold tracking-[-0.01em] text-brand-accent1 mb-5 md:mb-6 flex items-center gap-2 md:gap-3 m-0 leading-[1.2]">
+                  <div class="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-brand-accent1">${ICONS.helpIcon}</div> Что может помочь
+                </h3>
+                <!-- Добавлен !mb-7 для защиты отступа от стилей Тильды -->
+                <ul class="space-y-3 sm:space-y-4 !mb-7 sm:!mb-10 md:!mb-14 p-0 list-none">${helpHtml}</ul>
+                <h4 class="text-[14px] sm:text-[16px] md:text-[18px] font-semibold tracking-[-0.01em] text-brand-accent1 mb-2 sm:mb-3 md:mb-4 m-0 leading-[1.2]">Что подойдёт из меню сейчас:</h4>
+                <ul class="space-y-3 p-0 list-none">${nowHtml}</ul>
+              </div>
+              
+            </div>
+
+            <!-- НОВЫЙ БЛОК МАРШРУТА -->
+            <div class="bg-white p-6 sm:p-[24px] md:p-[32px] rounded-[24px] sm:rounded-[28px] md:rounded-[32px] shadow-[0_8px_32px_rgba(30,47,94,0.06)] mb-6 sm:mb-7 md:mb-8 box-border w-full">
+              <div class="text-left">
+                <h3 class="text-[20px] sm:text-[24px] md:text-[28px] font-semibold tracking-[-0.01em] text-brand-accent1 mb-3 m-0 leading-[1.2]">Сколько лет вы планируете быть таким же — или лучше?</h3>
+                <p class="text-[14px] sm:text-[16px] text-brand-muted mb-8 leading-[1.5] m-0">Энерголетие — маршрут для тех, кто хочет не просто чувствовать себя нормально, а понимать, что именно работает для его организма. И управлять этим.</p>
+                <div class="relative border-l-2 border-[#D8DFF3] ml-5 space-y-6 sm:space-y-8 pb-2">
+                  <div class="relative pl-8 sm:pl-10">
+                    <div class="absolute -left-[13px] top-0 w-[24px] h-[24px] rounded-full bg-[#1E2F5E] border-[3px] border-[#D8DFF3] flex items-center justify-center text-[13px] font-normal text-white shadow-sm leading-none">1</div>
+                    <h4 class="text-[16px] sm:text-[18px] font-semibold text-brand-accent1 m-0 mb-1 leading-[1.2]">Попробуйте меню</h4>
+                    <p class="text-[13px] sm:text-[15px] text-brand-muted m-0 leading-[1.4]">Еда под ваше состояние прямо сейчас — фокус, энергия, восстановление. Создано с нутрициологами Medscan Hadassah.</p>
+                  </div>
+                  <div class="relative pl-8 sm:pl-10">
+                    <div class="absolute -left-[13px] top-0 w-[24px] h-[24px] rounded-full bg-[#1E2F5E] border-[3px] border-[#D8DFF3] flex items-center justify-center text-[13px] font-normal text-white shadow-sm leading-none">2</div>
+                    <h4 class="text-[16px] sm:text-[18px] font-semibold text-brand-accent1 m-0 mb-1 leading-[1.2] flex flex-wrap gap-2 items-center">Сдайте Профиль Энерголетия <a href="#" class="text-[12px] bg-brand-secondary text-brand-accent2 px-2 py-0.5 rounded-full no-underline hover:opacity-80 transition-opacity">Перейти</a></h4>
+                    <p class="text-[13px] sm:text-[15px] text-brand-muted m-0 leading-[1.4]">35+ маркеров крови, которые стандартный чекап не видит. Ваша личная картина энергии, воспаления и восстановления.</p>
+                  </div>
+                  <div class="relative pl-8 sm:pl-10">
+                    <div class="absolute -left-[13px] top-0 w-[24px] h-[24px] rounded-full bg-[#1E2F5E] border-[3px] border-[#D8DFF3] flex items-center justify-center text-[13px] font-normal text-white shadow-sm leading-none">3</div>
+                    <h4 class="text-[16px] sm:text-[18px] font-semibold text-brand-accent1 m-0 mb-1 leading-[1.2] flex flex-wrap gap-2 items-center">Получите биологический портрет <a href="#" class="text-[12px] bg-brand-secondary text-brand-accent2 px-2 py-0.5 rounded-full no-underline hover:opacity-80 transition-opacity">Записаться</a></h4>
+                    <p class="text-[13px] sm:text-[15px] text-brand-muted m-0 leading-[1.4]">Бесплатная онлайн-консультация превентолога входит в чекап. Узнайте, как работает ваш организм — и где утекает ресурс.</p>
+                  </div>
+                  <div class="relative pl-8 sm:pl-10">
+                    <div class="absolute -left-[13px] top-0 w-[24px] h-[24px] rounded-full bg-[#1E2F5E] border-[3px] border-[#D8DFF3] flex items-center justify-center text-[13px] font-normal text-white shadow-sm leading-none">4</div>
+                    <h4 class="text-[16px] sm:text-[18px] font-semibold text-brand-accent1 m-0 mb-1 leading-[1.2] flex flex-wrap gap-2 items-center">Уйдите с планом <a href="#" class="text-[12px] bg-brand-secondary text-brand-accent2 px-2 py-0.5 rounded-full no-underline hover:opacity-80 transition-opacity">Подробнее</a></h4>
+                    <p class="text-[13px] sm:text-[15px] text-brand-muted m-0 leading-[1.4]">Офлайн-встреча в Medscan Hadassah. Персональные интервенции, нутрицевтики и протоколы.</p>
+                  </div>
+                </div>
+                
+                <div class="mt-8 sm:mt-10">
+                  <button class="bg-brand-grad hover:opacity-90 text-white text-[14px] sm:text-[16px] md:text-[18px] font-semibold tracking-[-0.01em] h-[48px] sm:h-[50px] md:h-[52px] px-6 sm:px-8 rounded-[100px] transition-all inline-flex items-center justify-center gap-2 border-none cursor-pointer group w-full sm:w-auto shadow-lg box-border">
+                    Начать с чекапа
+                    <div class="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform">${ICONS.arrowRight}</div>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Акцентный блок -->
+            <div class="bg-brand-grad text-white p-6 sm:p-[24px] md:p-[32px] rounded-[24px] sm:rounded-[28px] md:rounded-[32px] relative overflow-hidden shadow-lg box-border">
+              <div class="relative z-10 w-full">
+                <h3 class="text-[24px] sm:text-[32px] md:text-[40px] font-normal tracking-[-0.01em] mb-4 md:mb-6 m-0 text-white leading-[1.1]">Если захочется разобраться глубже</h3>
+                <p class="text-[16px] sm:text-[17px] md:text-[18px] font-normal tracking-[-0.02em] text-white/90 leading-[1.5] mb-6 sm:mb-8 md:mb-10 w-full m-0">${result.deep}</p>
+                
+                <div class="flex flex-row flex-wrap gap-4 sm:gap-5 md:gap-6 items-start">
+                  <button class="bg-white text-brand-accent1 hover:bg-brand-secondary text-[13px] sm:text-[14px] md:text-[16px] font-semibold tracking-[-0.01em] h-[48px] sm:h-[50px] md:h-[52px] px-2 sm:px-6 md:px-8 rounded-[100px] transition-colors inline-flex items-center justify-center gap-2 border-none cursor-pointer group w-full sm:w-auto max-w-full whitespace-nowrap box-border">
+                    Узнать свой профиль энерголетия
+                    <div class="w-4 h-4 sm:w-4 sm:h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform">${ICONS.arrowRight}</div>
+                  </button>
+                  
+                  <div class="flex flex-col w-full sm:w-auto">
+                    <div onclick="medscanQuiz.copyPromo('ENERGY2026', this.querySelector('.promo-copy-btn'), event)" style="-webkit-tap-highlight-color: transparent;" class="bg-white/20 hover:bg-white/30 cursor-pointer backdrop-blur-sm border border-white/30 flex items-center justify-center sm:justify-between relative sm:static gap-4 h-[48px] sm:h-[50px] md:h-[52px] px-5 md:px-6 rounded-[100px] w-full sm:w-auto box-border transition-colors group">
+                      <span class="text-white font-bold text-[16px] sm:text-[18px] md:text-[20px] tracking-wider uppercase select-none">ENERGY2026</span>
+                      <div class="promo-copy-btn shrink-0 absolute right-4 sm:static bg-transparent border-none flex items-center justify-center text-white opacity-60 group-hover:opacity-100 transition-all w-6 h-6 md:w-7 md:h-7">
+                        ${ICONS.copy}
+                      </div>
+                    </div>
+                    <span class="promo-label text-white/80 text-[10px] uppercase tracking-wider text-center mt-1.5 font-medium select-none">Промокод</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+
+    goForm: function() {
+      this.step = 'form';
+      this.render();
+    },
+
+    checkForm: function() {
+      const name = document.getElementById('mz_name').value.trim();
+      const phone = document.getElementById('mz_phone').value.trim();
+      const a1 = document.getElementById('mz_a1').checked;
+      const a2 = document.getElementById('mz_a2').checked;
+      const btn = document.getElementById('mz_btn');
+
+      if (name && phone && a1 && a2) {
+        btn.disabled = false;
+        btn.className = "w-full bg-brand-grad hover:opacity-90 text-white text-[18px] sm:text-[19px] md:text-[20px] font-semibold tracking-[-0.01em] h-[48px] sm:h-[52px] md:h-auto py-0 md:py-5 px-8 md:px-10 rounded-[100px] transition-all border-none cursor-pointer shadow-lg flex items-center justify-center";
+      } else {
+        btn.disabled = true;
+        btn.className = "w-full bg-brand-border/60 cursor-not-allowed text-brand-muted text-[18px] sm:text-[19px] md:text-[20px] font-semibold tracking-[-0.01em] h-[48px] sm:h-[52px] md:h-auto py-0 md:py-5 px-8 md:px-10 rounded-[100px] transition-all border-none flex items-center justify-center";
+      }
+    },
+
+    submitOnlyMake: function(event) {
+      event.preventDefault();
+      const btn = document.getElementById('mz_btn');
+      btn.innerHTML = "Отправка...";
+      btn.disabled = true;
+
+      // Имитируем небольшую задержку сети для реалистичности в портфолио,
+      // но данные никуда не отправляем
+      setTimeout(() => {
+        this.startQuiz();
+      }, 500);
+    },
+
+    startQuiz: function() {
+      this.step = 'quiz';
+      this.currentQuestionIndex = 0;
+      this.answers = [];
+      this.render();
+    },
+
+    answer: function(category) {
+      this.answers.push(category);
+      if (this.currentQuestionIndex < questions.length - 1) {
+        this.currentQuestionIndex++;
+        this.render();
+      } else {
+        this.step = 'result';
+        this.render();
+      }
+    },
+
+    calculateResult: function() {
+      const counts = this.answers.reduce((acc, cat) => {
+        acc[cat] = (acc[cat] || 0) + 1;
+        return acc;
+      }, {});
+
+      let maxCat = Object.keys(counts)[0];
+      let maxCount = counts[maxCat];
+
+      for (const cat in counts) {
+        if (counts[cat] > maxCount) {
+          maxCat = cat;
+          maxCount = counts[cat];
+        }
+      }
+      return resultsData[maxCat];
+    },
+
+    restart: function() {
+      this.step = 'intro';
+      this.currentQuestionIndex = 0;
+      this.answers = [];
+      this.render();
+    },
+
+    copyPromo: function(text, btnElement, event) {
+      // Предотвращаем любые всплытия событий, которые могут перезагрузить страницу
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      // Создаем текстовое поле для копирования
+      let textArea = document.createElement("textarea");
+      textArea.value = text;
+      
+      // Блокируем вызов клавиатуры на iOS
+      textArea.setAttribute('readonly', '');
+      
+      // Прячем элемент
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      
+      // Универсальное выделение текста, которое работает в Safari
+      textArea.focus();
+      textArea.select();
+      textArea.setSelectionRange(0, 999999); // Ключевой хак для iOS
+
+      try {
+        // Синхронный вызов копирования, чтобы Safari не заблокировал действие
+        document.execCommand('copy');
+      } catch (error) {
+        console.error('Copy failed', error);
+      }
+      
+      // Удаляем временное поле и снимаем выделение, чтобы не было визуальных багов
+      document.body.removeChild(textArea);
+      if (window.getSelection) {
+        window.getSelection().removeAllRanges();
+      }
+
+      // Меняем интерфейс
+      btnElement.innerHTML = ICONS.copyCheck;
+      btnElement.classList.remove('opacity-60');
+      btnElement.classList.add('opacity-100');
+
+      const label = btnElement.closest('.flex-col').querySelector('.promo-label');
+      if(label) label.innerText = "СКОПИРОВАНО";
+
+      // Возвращаем обратно через 2 секунды
+      setTimeout(() => {
+        btnElement.innerHTML = ICONS.copy; 
+        btnElement.classList.add('opacity-60');
+        btnElement.classList.remove('opacity-100');
+        if(label) label.innerText = "ПРОМОКОД";
+      }, 2000);
+    }
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    window.medscanQuiz.render();
+  });
+</script>

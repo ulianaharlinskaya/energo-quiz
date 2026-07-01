@@ -1,86 +1,95 @@
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Квиз Энерголетие</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  // Настраиваем фирменные цвета, градиент и шрифт
-  tailwind.config = {
-    corePlugins: { preflight: false },
-    theme: {
-      extend: {
-        fontFamily: {
-          sans: ['Manrope', 'sans-serif'],
-        },
-        colors: {
-          brand: {
-            accent1: '#1E2F5E',   // Акцентный синий
-            accent2: '#005754',   // Акцентный зеленый
-            secondary: '#EBF5F9', // Второстепенный светло-голубой
-            text: '#1C1E1D',      // Основной текст
-            muted: '#68706D',     // Второстепенный текст
-            border: '#E1E4E2',    // Цвет рамок (нейтральный)
-            cardtext: '#627A84',  // Цвет текста для спец-карточки
-            focus: '#BCE8EA',     // Цвет обводки инпутов
-            checkbox_bg: '#E5EEF1' // Фон чекбокса
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Настраиваем фирменные цвета, градиент и шрифт
+    tailwind.config = {
+      corePlugins: { preflight: false },
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Manrope', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              accent1: '#1E2F5E',   // Акцентный синий
+              accent2: '#005754',   // Акцентный зеленый
+              secondary: '#EBF5F9', // Второстепенный светло-голубой
+              text: '#1C1E1D',      // Основной текст
+              muted: '#68706D',     // Второстепенный текст
+              border: '#E1E4E2',    // Цвет рамок (нейтральный)
+              cardtext: '#627A84',  // Цвет текста для спец-карточки
+              focus: '#BCE8EA',     // Цвет обводки инпутов
+              checkbox_bg: '#E5EEF1' // Фон чекбокса
+            }
+          },
+          backgroundImage: {
+            'brand-grad': 'linear-gradient(90deg, #40CEC7 0%, #0071BA 50%, #1E315E 100%)',
           }
-        },
-        backgroundImage: {
-          'brand-grad': 'linear-gradient(90deg, #40CEC7 0%, #0071BA 50%, #1E315E 100%)',
         }
       }
     }
-  }
-</script>
+  </script>
 
-<style>
-  #medscan-quiz-wrapper {
-    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  #medscan-quiz-wrapper * {
-    box-sizing: border-box;
-  }
-  #medscan-quiz-wrapper button, 
-  #medscan-quiz-wrapper input {
-    font-family: inherit;
-    outline: none;
-    box-shadow: none;
-  }
-  #medscan-quiz-wrapper input[type="text"],
-  #medscan-quiz-wrapper input[type="tel"],
-  #medscan-quiz-wrapper input[type="email"] {
-    background-color: #FAFAFA;
-    border: 1px solid #E1E4E2;
-    color: #1C1E1D;
-    transition: border-color 0.2s ease;
-  }
-  /* Обводка инпута при фокусе */
-  #medscan-quiz-wrapper input:focus {
-    border-color: #BCE8EA !important;
-    box-shadow: 0 0 0 1px #BCE8EA;
-  }
-  #medscan-quiz-wrapper input::placeholder {
-    color: #A0A5A3;
-  }
-  /* Плавные анимации появления */
-  @keyframes mzFadeInUp {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .mz-animate-in {
-    animation: mzFadeInUp 0.5s ease-out forwards;
-  }
-  /* Убираем любые браузерные тени и лишние обводки у кнопок ответов */
-  .quiz-option-btn {
-    box-shadow: none !important;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-  }
-</style>
+  <style>
+    #medscan-quiz-wrapper {
+      font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    #medscan-quiz-wrapper * {
+      box-sizing: border-box;
+    }
+    #medscan-quiz-wrapper button, 
+    #medscan-quiz-wrapper input {
+      font-family: inherit;
+      outline: none;
+      box-shadow: none;
+    }
+    #medscan-quiz-wrapper input[type="text"],
+    #medscan-quiz-wrapper input[type="tel"],
+    #medscan-quiz-wrapper input[type="email"] {
+      background-color: #FAFAFA;
+      border: 1px solid #E1E4E2;
+      color: #1C1E1D;
+      transition: border-color 0.2s ease;
+    }
+    /* Обводка инпута при фокусе */
+    #medscan-quiz-wrapper input:focus {
+      border-color: #BCE8EA !important;
+      box-shadow: 0 0 0 1px #BCE8EA;
+    }
+    #medscan-quiz-wrapper input::placeholder {
+      color: #A0A5A3;
+    }
+    /* Плавные анимации появления */
+    @keyframes mzFadeInUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .mz-animate-in {
+      animation: mzFadeInUp 0.5s ease-out forwards;
+    }
+    /* Убираем любые браузерные тени и лишние обводки у кнопок ответов */
+    .quiz-option-btn {
+      box-shadow: none !important;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+    }
+  </style>
+</head>
+<body>
 
 <div id="medscan-quiz-wrapper" class="min-h-screen bg-brand-secondary text-brand-text selection:bg-white/50 py-6 sm:py-8 md:py-12">
   <div class="max-w-3xl mx-auto px-4">
@@ -107,6 +116,7 @@
 
   </div>
 </div>
+
 <script>
   // Иконки SVG
   const ICONS = {
@@ -260,7 +270,7 @@
 
                 <label class="flex items-center gap-3 md:gap-4 cursor-pointer group m-0">
                   <div class="relative flex items-center justify-center w-5 h-5 md:w-6 md:h-6 shrink-0">
-                    <input type="checkbox" id="mz_a3" name="subscribe" onchange="medscanQuiz.checkForm()" class="peer sr-only" />
+                    <input type="checkbox" id="mz_a3" name="subscribe" class="peer sr-only" />
                     <div class="w-5 h-5 md:w-6 md:h-6 bg-brand-checkbox_bg rounded-[6px] peer-checked:bg-brand-accent1 transition-colors"></div>
                     <div class="absolute inset-0 flex items-center justify-center text-white opacity-0 peer-checked:opacity-100 transition-opacity">
                       <div class="w-3.5 h-3.5 md:w-4 md:h-4 flex items-center justify-center">${ICONS.check}</div>
@@ -382,7 +392,7 @@
                   <div class="relative pl-8 sm:pl-10">
                     <div class="absolute -left-[13px] top-0 w-[24px] h-[24px] rounded-full bg-[#1E2F5E] border-[3px] border-[#D8DFF3] flex items-center justify-center text-[13px] font-normal text-white shadow-sm leading-none">4</div>
                     <h4 class="text-[16px] sm:text-[18px] font-semibold text-brand-accent1 m-0 mb-1 leading-[1.2] flex flex-wrap gap-2 items-center">Уйдите с планом <a href="#" class="text-[12px] bg-brand-secondary text-brand-accent2 px-2 py-0.5 rounded-full no-underline hover:opacity-80 transition-opacity">Подробнее</a></h4>
-                    <p class="text-[13px] sm:text-[15px] text-brand-muted m-0 leading-[1.4]">Офлайн-встреча в Medscan Hadassah. Персональные интервенции, нутрицевтики и протоколы.</p>
+                    <p class="text-[13px] sm:text-[15px] text-brand-muted m-0 leading-[1.4]">Офлайн-встреча в Medscan Hadassah. Персональные интервенции, нутрицевтики и протоколы — включая флагманские решения уровня ОЭСР.</p>
                   </div>
                 </div>
                 
@@ -437,6 +447,7 @@
       const a2 = document.getElementById('mz_a2').checked;
       const btn = document.getElementById('mz_btn');
 
+      // Убрана проверка a3 из условия
       if (name && phone && a1 && a2) {
         btn.disabled = false;
         btn.className = "w-full bg-brand-grad hover:opacity-90 text-white text-[18px] sm:text-[19px] md:text-[20px] font-semibold tracking-[-0.01em] h-[48px] sm:h-[52px] md:h-auto py-0 md:py-5 px-8 md:px-10 rounded-[100px] transition-all border-none cursor-pointer shadow-lg flex items-center justify-center";
@@ -452,11 +463,10 @@
       btn.innerHTML = "Отправка...";
       btn.disabled = true;
 
-      // Имитируем небольшую задержку сети для реалистичности в портфолио,
-      // но данные никуда не отправляем
+      // Имитируем небольшую задержку загрузки для реалистичности в портфолио
       setTimeout(() => {
         this.startQuiz();
-      }, 500);
+      }, 600);
     },
 
     startQuiz: function() {
@@ -503,44 +513,36 @@
     },
 
     copyPromo: function(text, btnElement, event) {
-      // Предотвращаем любые всплытия событий, которые могут перезагрузить страницу
       if (event) {
         event.preventDefault();
         event.stopPropagation();
       }
 
-      // Создаем текстовое поле для копирования
       let textArea = document.createElement("textarea");
       textArea.value = text;
       
-      // Блокируем вызов клавиатуры на iOS
       textArea.setAttribute('readonly', '');
       
-      // Прячем элемент
       textArea.style.position = "fixed";
       textArea.style.left = "-999999px";
       textArea.style.top = "-999999px";
       document.body.appendChild(textArea);
       
-      // Универсальное выделение текста, которое работает в Safari
       textArea.focus();
       textArea.select();
-      textArea.setSelectionRange(0, 999999); // Ключевой хак для iOS
+      textArea.setSelectionRange(0, 999999);
 
       try {
-        // Синхронный вызов копирования, чтобы Safari не заблокировал действие
         document.execCommand('copy');
       } catch (error) {
         console.error('Copy failed', error);
       }
       
-      // Удаляем временное поле и снимаем выделение, чтобы не было визуальных багов
       document.body.removeChild(textArea);
       if (window.getSelection) {
         window.getSelection().removeAllRanges();
       }
 
-      // Меняем интерфейс
       btnElement.innerHTML = ICONS.copyCheck;
       btnElement.classList.remove('opacity-60');
       btnElement.classList.add('opacity-100');
@@ -548,7 +550,6 @@
       const label = btnElement.closest('.flex-col').querySelector('.promo-label');
       if(label) label.innerText = "СКОПИРОВАНО";
 
-      // Возвращаем обратно через 2 секунды
       setTimeout(() => {
         btnElement.innerHTML = ICONS.copy; 
         btnElement.classList.add('opacity-60');
@@ -562,3 +563,6 @@
     window.medscanQuiz.render();
   });
 </script>
+
+</body>
+</html>
